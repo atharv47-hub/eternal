@@ -16,11 +16,53 @@ $("revealSecret").addEventListener("click",()=>toggleSecret(true));$("closeSecre
 $("copyHandle").addEventListener("click",async()=>{const handle="@atharv.khedkar47";try{await navigator.clipboard.writeText(handle);toast("HANDLE COPIED: "+handle);}catch{toast("INSTAGRAM HANDLE: "+handle);}});
 const audio=$("audioPlayer"), play=$("playMusic"), status=$("musicStatus"), select=$("trackSelect"), eq=document.querySelector(".equalizer");
 function updateTrackLabel(){const name=select.value.includes("baila-lento")?"BAILA LENTO":"MONTAGEM DIAMANTE ROSA";$("trackTitle").textContent=name;status.textContent="LOOP ENABLED • "+name;}
-select.addEventListener("change",async()=>{audio.src=select.value;audio.loop=true;updateTrackLabel();try{await audio.play();play.textContent="Ⅱ";eq.classList.add("playing");$("audioNotice").textContent="NOW PLAYING — "+$("trackTitle").textContent+" • LOOP ENABLED";}catch{play.textContent="▶";eq.classList.remove("playing");$("audioNotice").textContent="AUTOPLAY BLOCKED BY BROWSER — tap PLAY to start your track.";toast("TAP PLAY TO START AUDIO");}});
+select.addEventListener("change",async()=>{audio.src=select.value;
+audio.loop=true;updateTrackLabel();
+
+// If the browser blocks automatic sound, start music on the visitor's first tap/click/key press.
+// This is the closest reliable browser-supported behavior for audible autoplay.
+let audioStartedByInteraction = false;
+async function startAudioFromInteraction() {
+  if (audioStartedByInteraction) return;
+  audioStartedByInteraction = true;
+  try {
+    await audio.play();
+    play.textContent = "Ⅱ";
+    eq.classList.add("playing");
+    status.textContent = "NOW PLAYING • LOOP ENABLED";
+    $("audioNotice").textContent = "NOW PLAYING — " + $("trackTitle").textContent + " • LOOP ENABLED";
+  } catch (error) {
+    audioStartedByInteraction = false;
+  }
+}
+document.addEventListener("pointerdown", startAudioFromInteraction, { once: true });
+document.addEventListener("keydown", startAudioFromInteraction, { once: true });
+try{await audio.play();play.textContent="Ⅱ";eq.classList.add("playing");$("audioNotice").textContent="NOW PLAYING — "+$("trackTitle").textContent+" • LOOP ENABLED";}catch{play.textContent="▶";eq.classList.remove("playing");$("audioNotice").textContent="AUTOPLAY BLOCKED BY BROWSER — tap PLAY to start your track.";toast("TAP PLAY TO START AUDIO");}});
 play.addEventListener("click",async()=>{if(audio.paused){try{await audio.play();play.textContent="Ⅱ";eq.classList.add("playing");status.textContent="NOW PLAYING • LOOP ENABLED";$("audioNotice").textContent="NOW PLAYING — "+$("trackTitle").textContent+" • LOOP ENABLED";}catch{toast("BROWSER COULD NOT START AUDIO");}}else{audio.pause();play.textContent="▶";eq.classList.remove("playing");status.textContent="PLAYBACK PAUSED";$("audioNotice").textContent="PAUSED — tap PLAY to resume looping audio."; }});
 audio.addEventListener("play",()=>{play.textContent="Ⅱ";eq.classList.add("playing");});audio.addEventListener("pause",()=>{play.textContent="▶";eq.classList.remove("playing");});
 audio.addEventListener("error",()=>{status.textContent="AUDIO COULD NOT LOAD — CHECK FILE";$("audioNotice").textContent="Audio file could not load. Check the assets folder and file names.";});
+
 audio.loop=true;updateTrackLabel();
+
+// If the browser blocks automatic sound, start music on the visitor's first tap/click/key press.
+// This is the closest reliable browser-supported behavior for audible autoplay.
+let audioStartedByInteraction = false;
+async function startAudioFromInteraction() {
+  if (audioStartedByInteraction) return;
+  audioStartedByInteraction = true;
+  try {
+    await audio.play();
+    play.textContent = "Ⅱ";
+    eq.classList.add("playing");
+    status.textContent = "NOW PLAYING • LOOP ENABLED";
+    $("audioNotice").textContent = "NOW PLAYING — " + $("trackTitle").textContent + " • LOOP ENABLED";
+  } catch (error) {
+    audioStartedByInteraction = false;
+  }
+}
+document.addEventListener("pointerdown", startAudioFromInteraction, { once: true });
+document.addEventListener("keydown", startAudioFromInteraction, { once: true });
+
 // Browsers generally block audible autoplay until the visitor interacts. Try autoplay, then provide a clear play control.
 window.addEventListener("load",async()=>{try{await audio.play();play.textContent="Ⅱ";eq.classList.add("playing");status.textContent="NOW PLAYING • LOOP ENABLED";$("audioNotice").textContent="NOW PLAYING — MONTAGEM DIAMANTE ROSA • LOOP ENABLED";}catch{play.textContent="▶";status.textContent="TAP PLAY IF AUTOPLAY IS BLOCKED";$("audioNotice").textContent="AUTOPLAY READY — some browsers block sound until you tap PLAY. Your selected track will loop."; }});
 function lockTerminal(){finishBoot();window.scrollTo({top:0,behavior:"smooth"});toast("TERMINAL SECURED. THIS PROFILE REMAINS PUBLIC.");}
